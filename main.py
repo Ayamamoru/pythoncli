@@ -2,59 +2,42 @@ import argparse
 import sys
 import os
 import json
+from datetime import datetime
 
 TASKS_FILE = "tasks.json"
+VERSION = "1.2.0"
 
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
         return []
     with open(TASKS_FILE, "r") as file:
         return json.load(file)
-
-def save_task(tasks):
+    
+def save_tasks(tasks):
     with open(TASKS_FILE, "w") as file:
         json.dump(tasks, file, indent=2)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("task", type=str, nargs="?", help="Task to add")
-parser.add_argument("-c", "--complete", type=int, help="Mark a task as complete by ID")
-parser.add_argument("-d", "--delete", type=int, help="Delete a task by ID")
-parser.add_argument("-l", "--list", help="List all tasks", action="store_true")
-args = parser.parse_args()
+def find_task(tasks, task_id):
+    for task in tasks:
+        if task["id"] == task_id:
+            return task
+    return None
 
-if len(sys.argv) == 1:
-    parser.print_help(sys.stderr)
-    sys.exit(1)
+def format_task(task):
+    status = "><>" if not task ["done"] else "[x]"
+    priority = task.get("priority", "medium")
+    priority_labels = {"low": "(low)", "medium": "(med)", "high": "(!!!)"}
+    label = priority_labels.get(priority, "(med)")
+    due = f"  -- due: {task['due']}" if task.get("due") else ""
+    return f"{status} {label} {task['id']}: {task['task']}{due}"
 
-if args.list:
-    tasks = load_tasks()
-    for task in tasks:
-        status = "x" if task["done"] else " "
-        print(f"[{status}] {task['id']}: {task['task']}")
-    sys.exit(0)
-elif args.complete:
-    tasks = load_tasks()
-    for task in tasks:
-        if task["id"] == args.complete:
-            task["done"] = True
-            save_task(tasks)
-            print(f"Task {args.complete} marked as complete")
-            break
-elif args.delete:
-    tasks = load_tasks()
-    new_tasks = []
-    for task in tasks:
-        if task["id"] != args.delete:
-            new_tasks.append(task)
-    tasks = new_tasks
-    save_task(new_tasks)
-    print(f"Task with ID of {args.delete} deleted")
-elif args.task:
-    tasks = load_tasks()
-    if len(tasks) == 0:
-        new_id = 1
-    else:
-        new_id = tasks[-1]["id"] + 1
-    tasks.append({"id": new_id, "task": args.task, "done": False})
-    save_task(tasks)
-    print(f"Task {args.task} added with ID of {new_id}")
+parser = argparse.ArgumentParser(
+    prog="fishk"
+    description="fishk -- a fishy little task manager",
+)
+
+parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION} ~o>><>")
+parser.add_argument("task", type=str, nargs="?", help="task to reel in!")
+parser.add_argument("-l", "--list", action="store_true", help="show yo whole catch")
+parser.add_argument("-c", "--catch", type=int, metavar="ID", help="mark a task as caught (complete)")
+
