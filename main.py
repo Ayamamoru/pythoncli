@@ -32,7 +32,7 @@ def format_task(task):
     return f"{status} {label} {task['id']}: {task['task']}{due}"
 
 parser = argparse.ArgumentParser(
-    prog="fishk"
+    prog="fishk",
     description="fishk -- a fishy little task manager",
 )
 
@@ -148,3 +148,5 @@ elif args.task:
     priority_labels = {"low": "(low)", "medium": "(med)", "high": "(!!)"}
     label = priority_labels.get(args.priority, "(med)")
     print(f"new fish on the line! {label} \"{args.task}\" added with ID {new_id}")
+
+#guys i love fish
