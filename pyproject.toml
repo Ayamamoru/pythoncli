@@ -1,0 +1,11 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pythoncli_Ayamamoru"
+version = "0.0.1"
+dependencies = []
+
+[project.scripts]
+fishk = "pythoncli_Ayamamoru.main:main"
